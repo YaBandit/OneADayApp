@@ -8,9 +8,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.restlet.resource.ClientResource;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -58,11 +63,25 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void getData() {
 
         HttpURLConnection connection = null;
+
         try {
+            HttpClient client = new DefaultHttpClient();
+
             final String testURL = String.format("http://localhost:9001/api/unix");
-            ClientResource client = new ClientResource(testURL);
-            String response = client.get().getText();
-            System.out.println(response);
+            HttpGet request = new HttpGet(testURL);
+
+            HttpResponse response = client.execute(request);
+
+            BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+            String line;
+
+            while ((line = rd.readLine()) != null) {
+                System.out.println(line);
+            }
+            //ClientResource client = new ClientResource(testURL);
+            //String response = client.get().getText();
+            //System.out.println(response);
             /*
             URL u = new URL("http://localhost:9001/api/unix");
             connection = (HttpURLConnection) u.openConnection();
@@ -71,6 +90,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             System.out.println("" + code);
             // You can determine on HTTP return code received. 200 is success.
             */
+
         } catch (MalformedURLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
