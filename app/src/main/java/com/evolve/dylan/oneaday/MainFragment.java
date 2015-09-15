@@ -8,16 +8,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -61,48 +55,30 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     public void getData() {
-
-        HttpURLConnection connection = null;
-
         try {
-            HttpClient client = new DefaultHttpClient();
+            String uri = "http://localhost:9001/api/unix";
+            URL url = new URL(uri);
 
-            final String testURL = String.format("http://localhost:9001/api/unix");
-            HttpGet request = new HttpGet(testURL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json");
 
-            HttpResponse response = client.execute(request);
-
-            BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-            String line;
-
-            while ((line = rd.readLine()) != null) {
-                System.out.println(line);
+            if (connection.getResponseCode() != 200) {
+                throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
             }
-            //ClientResource client = new ClientResource(testURL);
-            //String response = client.get().getText();
-            //System.out.println(response);
-            /*
-            URL u = new URL("http://localhost:9001/api/unix");
-            connection = (HttpURLConnection) u.openConnection();
-            connection.setRequestMethod("HEAD");
-            int code = connection.getResponseCode();
-            System.out.println("" + code);
-            // You can determine on HTTP return code received. 200 is success.
-            */
 
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            BufferedReader br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
+
+            String output;
+            System.out.println("Output from Server .... \n");
+            while ((output = br.readLine()) != null) {
+                System.out.println(output);
+            }
+
+            connection.disconnect();
+
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
         }
     }
-
-
 }
