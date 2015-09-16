@@ -1,4 +1,4 @@
-package com.evolve.dylan.oneaday;
+package com.evolve.dylan.oneaday.reusableFragments;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -21,6 +21,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.evolve.dylan.oneaday.R;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
