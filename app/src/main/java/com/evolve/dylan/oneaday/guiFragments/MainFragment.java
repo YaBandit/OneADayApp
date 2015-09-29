@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.evolve.dylan.oneaday.R;
+import com.evolve.dylan.oneaday.serverHandling.GetPhotoRestAdapter;
+import com.evolve.dylan.oneaday.serverHandling.PictureData;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
@@ -28,14 +30,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 /**
  * Created by dylan on 09/09/2015.
  */
 public class MainFragment extends Fragment implements View.OnClickListener {
 
-    private Button getData, getPhoto;
+    private Button getData, getPhoto, getRetroImage;
     private TextView showData;
-    private ImageView imageView;
+    private ImageView imageView, retroImage;
 
     private JSONObject jsonObject = new JSONObject();
 
@@ -63,6 +69,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.getPhotoButton:
                 getPhoto();
+                break;
+            case R.id.retroImageButton:
+                getRetroImage();
+                break;
         }
     }
 
@@ -71,9 +81,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         getPhoto = (Button) v.findViewById(R.id.getPhotoButton);
         showData = (TextView) v.findViewById(R.id.showDataTextbox);
         imageView = (ImageView) v.findViewById(R.id.serverPhoto);
+        getRetroImage = (Button) v.findViewById(R.id.retroImageButton);
+        retroImage = (ImageView) v.findViewById(R.id.retroImage);
 
         getData.setOnClickListener(this);
         getPhoto.setOnClickListener(this);
+        getRetroImage.setOnClickListener(this);
     }
 
     public void getData() {
@@ -112,6 +125,41 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     }
 
+    public void getRetroImage() {
+
+        DoPhotoClass doPhotoClass = new DoPhotoClass();
+        doPhotoClass.runRetrofitTestAsync();
+        PictureData pictureData = doPhotoClass.getPictureDataReal();
+    }
+
+    private class DoPhotoClass {
+
+        public PictureData getPictureDataReal() {
+            return pictureDataReal;
+        }
+
+        private PictureData pictureDataReal;
+        private GetPhotoRestAdapter getPhotoRestAdapter;
+
+        Callback<PictureData> pictureDataCallback = new Callback<PictureData>() {
+            @Override
+            public void success(PictureData pictureData, Response response) {
+                pictureDataReal = pictureData;
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                //Nothing
+            }
+        };
+
+        public void runRetrofitTestAsync () {
+            getPhotoRestAdapter.getPhoto(pictureDataCallback);
+        }
+
+
+    }
+
     class ASyncServerPing extends AsyncTask <List<String>, String, String> {
 
         final String url;
@@ -144,21 +192,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 }
 
                 BufferedReader br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
-
-                //JSONObject jsonObject1 = new JSONObject(br.readLine());
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                 final JSONObject jsonObject1 = new JSONObject(br.readLine());
                 final String data = jsonObject1.getString("photo");
