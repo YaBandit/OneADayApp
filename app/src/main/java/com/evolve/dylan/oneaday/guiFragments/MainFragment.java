@@ -2,6 +2,8 @@ package com.evolve.dylan.oneaday.guiFragments;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,10 +12,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.evolve.dylan.oneaday.MainActivity;
 import com.evolve.dylan.oneaday.R;
+
+import org.apache.commons.codec.binary.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,8 +33,11 @@ import java.util.List;
  */
 public class MainFragment extends Fragment implements View.OnClickListener {
 
-    private Button getData;
+    private Button getData, getPhoto;
     private TextView showData;
+    private ImageView imageView;
+
+    private JSONObject jsonObject = new JSONObject();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,8 +52,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         setGuiComponents(rootView);
 
-
-
         return rootView;
     }
 
@@ -54,14 +61,19 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             case R.id.getDataButton:
                 getData();
                 break;
+            case R.id.getPhotoButton:
+                getPhoto();
         }
     }
 
     public void setGuiComponents(View v) {
         getData = (Button) v.findViewById(R.id.getDataButton);
+        getPhoto = (Button) v.findViewById(R.id.getPhotoButton);
         showData = (TextView) v.findViewById(R.id.showDataTextbox);
+        imageView = (ImageView) v.findViewById(R.id.serverPhoto);
 
         getData.setOnClickListener(this);
+        getPhoto.setOnClickListener(this);
     }
 
     public void getData() {
@@ -82,11 +94,30 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     }
 
+    public void getPhoto() {
+
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialogInterface, final int which) {
+
+            }
+        });
+
+        ProgressDialog progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage("Please wait ...");
+        progressDialog.show();
+
+        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.100:9001/api/photo", 9001, progressDialog);
+        aSyncServerPing.execute();
+
+    }
+
     class ASyncServerPing extends AsyncTask <List<String>, String, String> {
 
         final String url;
         final int port;
 
+         Bitmap bitmap;
         String result = "";
 
         private ProgressDialog progressDialog;
@@ -100,10 +131,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         @Override
         protected String doInBackground(List<String>... params) {
             try {
-                String uri = "http://192.168.1.101:9001/api/unix";
-                URL url = new URL(uri);
+                //String uri = "http://192.168.1.101:9001/api/unix";
 
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                URL urlO = new URL(url);
+
+                HttpURLConnection connection = (HttpURLConnection) urlO.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Accept", "application/json");
 
@@ -113,17 +145,42 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
                 BufferedReader br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
 
+                //JSONObject jsonObject1 = new JSONObject(br.readLine());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                final JSONObject jsonObject1 = new JSONObject(br.readLine());
+                final String data = jsonObject1.getString("photo");
+                byte[] dataArray = android.util.Base64.decode(data, android.util.Base64.URL_SAFE);
+                //byte[] imageDataBytes = Base64.decodeBase64(data);
+
+                bitmap = BitmapFactory.decodeByteArray(dataArray, 0, dataArray.length);
+
+
+                /*
                 String output;
                 System.out.println("Output from Server .... \n");
                 while ((output = br.readLine()) != null) {
                     System.out.println(output);
                     result = output;
                 }
+                */
                 connection.disconnect();
 
-
-
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
 
@@ -133,7 +190,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         @Override
         protected void onPostExecute(String s) {
             progressDialog.dismiss();
-            showData.setText(result);
+            imageView.setImageBitmap(bitmap);
+            //showData.setText(result);
         }
 
         @Override
