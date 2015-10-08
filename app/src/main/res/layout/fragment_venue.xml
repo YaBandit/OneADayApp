@@ -1,0 +1,68 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" tools:context="com.evolve.dylan.oneaday.guiFragments.VenueFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="300px"
+            android:id="@+id/VenueImage" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/VenueTitleText"
+            android:paddingLeft="10px"
+            android:paddingTop="10px" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="200px"
+            android:id="@+id/scrollView"
+            android:paddingLeft="10px"
+            android:paddingRight="10px"
+            android:paddingTop="10px"
+            android:paddingBottom="10px">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/VenueDescriptionText" />
+        </ScrollView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/VenueRatingCount"
+            android:text="Venue Rating"
+            android:paddingLeft="10px" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/VenueRatingNumberText" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vote Venue"
+                android:id="@+id/VoteForVenusButton" />
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>
