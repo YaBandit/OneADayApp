@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evolve.dylan.oneaday.MainActivity;
 import com.evolve.dylan.oneaday.R;
 import com.evolve.dylan.oneaday.serverHandling.GetPhotoRestAdapter;
 import com.evolve.dylan.oneaday.serverHandling.PictureData;
@@ -26,6 +27,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -43,11 +45,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private TextView showData;
     private ImageView imageView, retroImage;
 
-    private JSONObject jsonObject = new JSONObject();
+    private static WeakReference<MainActivity> mainActivityWeakReference;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mainActivityWeakReference = new WeakReference<>((MainActivity) getActivity());
     }
 
     @Override
@@ -126,10 +129,26 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     public void getRetroImage() {
-
         DoPhotoClass doPhotoClass = new DoPhotoClass();
         doPhotoClass.runRetrofitTestAsync();
         PictureData pictureData = doPhotoClass.getPictureDataReal();
+    }
+
+    public void updateUI(final PictureData pictureData) {
+        if (mainActivityWeakReference == null) {
+            return;
+        }
+
+        mainActivityWeakReference.get().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final String data = pictureData.getPhoto();
+                byte[] dataArray = android.util.Base64.decode(data, android.util.Base64.URL_SAFE);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(dataArray, 0, dataArray.length);
+                imageView.setImageBitmap(bitmap);
+            }
+        })
+         ;
     }
 
     private class DoPhotoClass {
@@ -145,11 +164,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             @Override
             public void success(PictureData pictureData, Response response) {
                 pictureDataReal = pictureData;
+                updateUI(pictureData);
             }
 
             @Override
             public void failure(RetrofitError error) {
-                //Nothing
                 int i = 1;
             }
         };

@@ -5,25 +5,13 @@ package com.evolve.dylan.oneaday.serverHandling;
  */
 public class PictureData {
 
-    public PictureData() {
+    public String getPhoto() {
+        return photo;
     }
 
-    private String photoName;
-    private String photoData;
-
-    public String getPhotoName() {
-        return photoName;
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
-    public void setPhotoName(String photoName) {
-        this.photoName = photoName;
-    }
-
-    public String getPhotoData() {
-        return photoData;
-    }
-
-    public void setPhotoData(String photoData) {
-        this.photoData = photoData;
-    }
+    private String photo;
 }
