@@ -15,7 +15,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evolve.dylan.oneaday.MainActivity;
 import com.evolve.dylan.oneaday.R;
+import com.evolve.dylan.oneaday.serverHandling.GetPhotoRestAdapter;
+import com.evolve.dylan.oneaday.serverHandling.PictureData;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
@@ -24,24 +27,30 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by dylan on 09/09/2015.
  */
 public class MainFragment extends Fragment implements View.OnClickListener {
 
-    private Button getData, getPhoto;
+    private Button getData, getPhoto, getRetroImage;
     private TextView showData;
-    private ImageView imageView;
+    private ImageView imageView, retroImage;
 
-    private JSONObject jsonObject = new JSONObject();
+    private static WeakReference<MainActivity> mainActivityWeakReference;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mainActivityWeakReference = new WeakReference<>((MainActivity) getActivity());
     }
 
     @Override
@@ -63,6 +72,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.getPhotoButton:
                 getPhoto();
+                break;
+            case R.id.retroImageButton:
+                getRetroImage();
+                break;
         }
     }
 
@@ -71,9 +84,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         getPhoto = (Button) v.findViewById(R.id.getPhotoButton);
         showData = (TextView) v.findViewById(R.id.showDataTextbox);
         imageView = (ImageView) v.findViewById(R.id.serverPhoto);
+        getRetroImage = (Button) v.findViewById(R.id.retroImageButton);
+        retroImage = (ImageView) v.findViewById(R.id.retroImage);
 
         getData.setOnClickListener(this);
         getPhoto.setOnClickListener(this);
+        getRetroImage.setOnClickListener(this);
     }
 
     public void getData() {
@@ -89,7 +105,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         progressDialog.setMessage("Please wait ...");
         progressDialog.show();
 
-        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.101:9001/api/unix", 9001, progressDialog);
+        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.105:9001/api/unix", 9001, progressDialog);
         aSyncServerPing.execute();
 
     }
@@ -107,8 +123,60 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         progressDialog.setMessage("Please wait ...");
         progressDialog.show();
 
-        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.100:9001/api/photo", 9001, progressDialog);
+        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.105:9001/api/photo", 9001, progressDialog);
         aSyncServerPing.execute();
+
+    }
+
+    public void getRetroImage() {
+        DoPhotoClass doPhotoClass = new DoPhotoClass();
+        doPhotoClass.runRetrofitTestAsync();
+        PictureData pictureData = doPhotoClass.getPictureDataReal();
+    }
+
+    public void updateUI(final PictureData pictureData) {
+        if (mainActivityWeakReference == null) {
+            return;
+        }
+
+        mainActivityWeakReference.get().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final String data = pictureData.getPhoto();
+                byte[] dataArray = android.util.Base64.decode(data, android.util.Base64.URL_SAFE);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(dataArray, 0, dataArray.length);
+                imageView.setImageBitmap(bitmap);
+            }
+        })
+         ;
+    }
+
+    private class DoPhotoClass {
+
+        public PictureData getPictureDataReal() {
+            return pictureDataReal;
+        }
+
+        private PictureData pictureDataReal;
+        private GetPhotoRestAdapter getPhotoRestAdapter = new GetPhotoRestAdapter();
+
+        Callback<PictureData> pictureDataCallback = new Callback<PictureData>() {
+            @Override
+            public void success(PictureData pictureData, Response response) {
+                pictureDataReal = pictureData;
+                updateUI(pictureData);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                int i = 1;
+            }
+        };
+
+        public void runRetrofitTestAsync () {
+            getPhotoRestAdapter.getPhoto(pictureDataCallback);
+        }
+
 
     }
 
@@ -117,7 +185,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         final String url;
         final int port;
 
-         Bitmap bitmap;
+        Bitmap bitmap;
         String result = "";
 
         private ProgressDialog progressDialog;
@@ -144,21 +212,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 }
 
                 BufferedReader br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
-
-                //JSONObject jsonObject1 = new JSONObject(br.readLine());
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                 final JSONObject jsonObject1 = new JSONObject(br.readLine());
                 final String data = jsonObject1.getString("photo");
