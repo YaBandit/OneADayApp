@@ -5,9 +5,7 @@ package com.evolve.dylan.oneaday.serverHandling;
  */
 public class PictureData {
 
-    public PictureData(String photoData, String photoName) {
-        this.photoData = photoData;
-        this.photoName = photoName;
+    public PictureData() {
     }
 
     private String photoName;

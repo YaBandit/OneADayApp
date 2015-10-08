@@ -102,7 +102,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         progressDialog.setMessage("Please wait ...");
         progressDialog.show();
 
-        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.101:9001/api/unix", 9001, progressDialog);
+        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.105:9001/api/unix", 9001, progressDialog);
         aSyncServerPing.execute();
 
     }
@@ -120,7 +120,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         progressDialog.setMessage("Please wait ...");
         progressDialog.show();
 
-        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.100:9001/api/photo", 9001, progressDialog);
+        ASyncServerPing aSyncServerPing = new ASyncServerPing("http://192.168.1.105:9001/api/photo", 9001, progressDialog);
         aSyncServerPing.execute();
 
     }
@@ -139,7 +139,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         private PictureData pictureDataReal;
-        private GetPhotoRestAdapter getPhotoRestAdapter;
+        private GetPhotoRestAdapter getPhotoRestAdapter = new GetPhotoRestAdapter();
 
         Callback<PictureData> pictureDataCallback = new Callback<PictureData>() {
             @Override
@@ -150,6 +150,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             @Override
             public void failure(RetrofitError error) {
                 //Nothing
+                int i = 1;
             }
         };
 
@@ -165,7 +166,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         final String url;
         final int port;
 
-         Bitmap bitmap;
+        Bitmap bitmap;
         String result = "";
 
         private ProgressDialog progressDialog;

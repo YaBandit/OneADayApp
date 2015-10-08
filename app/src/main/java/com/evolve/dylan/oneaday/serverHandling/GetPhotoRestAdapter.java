@@ -10,8 +10,7 @@ public class GetPhotoRestAdapter {
 
     protected RestAdapter restAdapter;
     protected GetPhotoApi api;
-    private static final String apiURL = "http://localhost:9001";
-
+    private static final String apiURL = "http://192.168.1.105:9001";
 
     public GetPhotoRestAdapter() {
         restAdapter = new RestAdapter.Builder()
